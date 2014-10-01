@@ -1,4 +1,4 @@
-package org.spacevseti.merger;
+package org.spacevseti;
 
 import java.util.ArrayList;
 import java.util.List;

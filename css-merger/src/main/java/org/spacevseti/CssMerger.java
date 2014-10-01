@@ -25,7 +25,6 @@ public class CssMerger {
     private final File rootCssDir;
     private final String mergingFileName;
 
-
     public CssMerger(File mergingFile) throws IOException {
         this.mergingFile = mergingFile;
         this.rootCssDir = mergingFile.getParentFile();
@@ -37,20 +36,21 @@ public class CssMerger {
      * @return warnings
      * @throws IOException
      */
-    public List<String> merge() throws IOException {
+    public ResultMerger merge() throws IOException {
         if (!mergingFile.exists()) {
             String errorMsg = "File " + mergingFile.getName() + " doesn't exist (" + mergingFile.getCanonicalPath() + ")";
             throw new IOException(errorMsg);
         }
 
-        File backupFile = new File(rootCssDir, "_"+ mergingFileName);
+        File backupFile = new File(rootCssDir, mergingFileName+".orig" + System.currentTimeMillis());
         FileUtils.copyFile(mergingFile, backupFile);
 
         File resultFile = new File(FileUtils.getTempDirectory(), "result.css");
+        FileUtils.deleteQuietly(resultFile);
 
         FileInputStream inputStream = null;
         FileOutputStream outputStream = null;
-        List<String> warnings = new ArrayList<String>();
+        ResultMerger resultMerger = new ResultMerger();
         try {
             inputStream = FileUtils.openInputStream(mergingFile);
             List<String> lines = IOUtils.readLines(inputStream, CHARSET);
@@ -58,7 +58,7 @@ public class CssMerger {
             FileUtils.deleteQuietly(resultFile);
             outputStream = FileUtils.openOutputStream(resultFile, true);
             for (String line : lines) {
-                List<String> analyzeResult = analyze(line, warnings);
+                List<String> analyzeResult = analyze(line, resultMerger);
                 IOUtils.writeLines(analyzeResult, IOUtils.LINE_SEPARATOR, outputStream, CHARSET);
             }
         } catch (IOException e) {
@@ -72,23 +72,24 @@ public class CssMerger {
         FileUtils.deleteQuietly(mergingFile);
         FileUtils.moveFile(resultFile, mergingFile);
 
-        return warnings;
+        return resultMerger;
     }
 
-    private List<String> analyze(String line, List<String> warnings) {
+    private List<String> analyze(String line, ResultMerger resultMerger) {
         if (StringUtils.startsWith(line, "@import url") && !StringUtils.startsWith(line, "@import url(http")) {
             String importFileName = StringUtils.substringBetween(line, "(", ")");
             if (StringUtils.contains(line, "do not copy")) {
-                warnings.add("Importing File '" + importFileName + "' was excluding)");
+                resultMerger.getExcludedFiles().add(importFileName);
             } else {
                 FileInputStream inputStream = null;
                 File importFile = new File(rootCssDir, importFileName);
                 try {
                     inputStream = FileUtils.openInputStream(importFile);
-                    return IOUtils.readLines(inputStream, CHARSET);
+                    List<String> result = IOUtils.readLines(inputStream, CHARSET);
+                    resultMerger.getMergedFiles().add(importFileName);
+                    return result;
                 } catch (IOException e) {
-                    String warningMsg = "Importing File " + importFile.getName() + " doesn't exist (" + importFileName + ").";
-                    warnings.add(warningMsg);
+                    resultMerger.getNotFoundFiles().add(importFileName);
                 } finally {
                     IOUtils.closeQuietly(inputStream);
                 }

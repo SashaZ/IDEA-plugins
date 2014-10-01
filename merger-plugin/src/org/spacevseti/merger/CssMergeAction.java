@@ -8,6 +8,8 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.spacevseti.CssMerger;
+import org.spacevseti.ResultMerger;
 
 import java.io.File;
 import java.io.IOException;
