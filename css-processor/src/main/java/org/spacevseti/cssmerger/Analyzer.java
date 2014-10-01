@@ -40,7 +40,7 @@ public class Analyzer {
         analyzeResult.getImportFileNames().add(importFileName);
 
         String excludeCause = isExcludeImportLine(line, importFileName, rootDir);
-        if (StringUtils.isNoneBlank(excludeCause)) {
+        if (StringUtils.isNotBlank(excludeCause)) {
             analyzeResult.getExcludeImportFileNamesWithCause().put(importFileName, excludeCause);
         }
     }

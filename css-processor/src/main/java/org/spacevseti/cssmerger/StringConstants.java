@@ -14,6 +14,7 @@ public enum StringConstants {
     CSS_IMPORT_START_LINE("@import url"),
     CSS_IMPORT_START_LINE_COMMENT("/*@import url"),
     CSS_IMPORT_REPLACE_PATTERN("^/\\*@import url\\((.+?\\.css)\\).*\\*/$"),
+    CSS_IMPORT_REPLACE_PATTERN2("^@import url\\((.+?\\.css)\\).*$"),
     CSS_EXCLUDE_IMPORT_WORDS("don't copy,do not copy,not copy,no copy"),
     EXCLUDE_CAUSE_DON_NOT_COPY("do not copy"),
     EXCLUDE_CAUSE_REMOTE_LINK("remote link"),

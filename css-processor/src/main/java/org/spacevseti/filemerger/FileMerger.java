@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class FileMerger {
     private static final Charset CHARSET = Charset.forName(StringConstants.CHARSET.getValue());
 
-    protected final File mergingFile;
+    private final File mergingFile;
     private final File rootDir;
     private final String mergingFileName;
 
