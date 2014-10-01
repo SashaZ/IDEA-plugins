@@ -1,4 +1,4 @@
-package org.spacevseti.merger;
+package org.spacevseti.cssmerger;
 
 import java.util.*;
 

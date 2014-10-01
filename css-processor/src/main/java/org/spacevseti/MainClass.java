@@ -1,6 +1,8 @@
 package org.spacevseti;
 
-import org.spacevseti.merger.CssMerger;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
+import org.spacevseti.cssmerger.CssMerger;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +14,22 @@ import java.io.IOException;
 public class MainClass {
 
     public static void main(String[] args) throws IOException {
-        System.out.println(new CssMerger(new File("css-processor/html1/css", "all.css")).mergeTemp());
+        File allCssFile = new File("css-processor/html1/css", "all.css");
+
+        System.out.println(new CssMerger(allCssFile).merge());
+//        testLineIterator(allCssFile);
+    }
+
+    private static void testLineIterator(File allCssFile) throws IOException {
+        LineIterator it = FileUtils.lineIterator(allCssFile, "UTF-8");
+        try {
+            while (it.hasNext()) {
+                String line = it.nextLine();
+                if (line.startsWith("@")) it.remove();
+                /// do something with line
+            }
+        } finally {
+            LineIterator.closeQuietly(it);
+        }
     }
 }

@@ -3,15 +3,16 @@ package org.spacevseti.filemerger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.spacevseti.merger.StringConstants;
+import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang3.StringUtils;
+import org.spacevseti.Utils;
+import org.spacevseti.cssmerger.StringConstants;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -41,18 +42,18 @@ public class FileMerger {
         this.excludeImportFilePaths = new HashSet<String>();
     }
 
-    public FileMerger setExcludeImportFilePaths(Collection<String> excludeImportFilePaths) {
-        excludeImportFilePaths.clear();
-        excludeImportFilePaths.addAll(excludeImportFilePaths);
+    public final FileMerger setExcludeImportFilePaths(Collection<String> excludeImportFilePaths) {
+        this.excludeImportFilePaths.clear();
+        this.excludeImportFilePaths.addAll(new HashSet<String>(excludeImportFilePaths));
         return this;
     }
 
-    public FileMerger setRemoveImportedFiles(boolean removeImportedFiles) {
+    public final FileMerger setRemoveImportedFiles(boolean removeImportedFiles) {
         this.removeImportedFiles = removeImportedFiles;
         return this;
     }
 
-    public final MergingResult merge() throws IOException {
+    public MergingResult merge() throws IOException {
         if (!mergingFile.exists()) {
             String errorMsg = "File " + mergingFile + " doesn't exist!";
             throw new IOException(errorMsg);
@@ -66,9 +67,14 @@ public class FileMerger {
 
         MergingResult mergingResult = merge(mergingFile, resultFile);
 
+        postProcessing(resultFile, mergingResult);
+
         FileUtils.deleteQuietly(mergingFile);
         FileUtils.moveFile(resultFile, mergingFile);
         return mergingResult;
+    }
+
+    protected void postProcessing(File resultFile, MergingResult mergingResult) throws IOException {
     }
 
     public final MergingResult merge(File inputFile, File outputFile) throws IOException {
@@ -88,16 +94,17 @@ public class FileMerger {
     }
 
     private MergingResult merge(InputStream inputStream, OutputStream outputStream) throws IOException {
-        List<String> readLines;
+        LineIterator lineIterator;
         try {
-            readLines = IOUtils.readLines(inputStream, CHARSET);
+            lineIterator = IOUtils.lineIterator(inputStream, CHARSET);
         } catch (IOException e) {
             String errorMsg = "Can't read lines!";
             throw new IOException(errorMsg, e);
         }
         try {
             MergingResult mergingResult = new MergingResult();
-            for (String line : readLines) {
+            while (lineIterator.hasNext()) {
+                String line = lineIterator.next();
                 if (!importContentByLine(line, outputStream, mergingResult)) {
                     IOUtils.writeLines(Collections.singletonList(line), IOUtils.LINE_SEPARATOR, outputStream, CHARSET);
                 }
@@ -106,16 +113,17 @@ public class FileMerger {
         } catch (IOException e) {
             String errorMsg = "Can't write new lines!";
             throw new IOException(errorMsg, e);
+        } finally {
+            LineIterator.closeQuietly(lineIterator);
         }
     }
 
     private boolean importContentByLine(String line, OutputStream outputStream, MergingResult mergingResult) throws IOException {
-        Matcher matcher = lineWithFilePathPattern.matcher(line);
-        if (!matcher.matches()) {
+        String importFilePath = Utils.getImportFileName(line, lineWithFilePathPattern, filePathGroupPosition);
+        if (StringUtils.isBlank(importFilePath)) {
             return false;
         }
 
-        String importFilePath = matcher.group(filePathGroupPosition);
         if (excludeImportFilePaths.contains(importFilePath)) {
             mergingResult.getExcludedFiles().add(importFilePath);
             return false;

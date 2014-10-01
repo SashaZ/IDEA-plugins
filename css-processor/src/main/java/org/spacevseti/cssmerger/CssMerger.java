@@ -1,4 +1,4 @@
-package org.spacevseti.merger;
+package org.spacevseti.cssmerger;
 
 import org.spacevseti.filemerger.FileMerger;
 import org.spacevseti.filemerger.MergingResult;
@@ -14,11 +14,13 @@ public class CssMerger extends FileMerger {
 
     public CssMerger(File mergingFile) throws IOException {
         super(mergingFile, StringConstants.CSS_IMPORT_REPLACE_PATTERN.getValue(), 1);
+
+        AnalyzeResult analyzeResult = new Analyzer().preMergeAnalyze(mergingFile);
+        setRemoveImportedFiles(false);
+        setExcludeImportFilePaths(analyzeResult.getExcludeImportFileNamesWithCause().keySet());
     }
 
-    public MergingResult mergeTemp() throws IOException {
-        AnalyzeResult analyzeResult = new Analyzer().preMergeAnalyze(mergingFile);
-        setExcludeImportFilePaths(analyzeResult.getExcludeImportFileNamesWithCause().keySet());
-        return merge();
+    protected final void postProcessing(File resultFile, MergingResult mergingResult) throws IOException {
+
     }
 }

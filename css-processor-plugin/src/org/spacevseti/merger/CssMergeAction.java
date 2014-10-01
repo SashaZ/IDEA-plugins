@@ -9,6 +9,8 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.spacevseti.cssmerger.CssMerger;
+import org.spacevseti.cssmerger.StringConstants;
 import org.spacevseti.filemerger.MergingResult;
 
 import java.io.File;
@@ -55,7 +57,7 @@ public class CssMergeAction extends AnAction {
 
         try {
             File mergingFile = new File(file.getCanonicalPath());
-            MergingResult mergingResult = new CssMerger(mergingFile).mergeTemp();
+            MergingResult mergingResult = new CssMerger(mergingFile).merge();
             Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + mergingResult,
                     "Information", Messages.getInformationIcon());
         } catch (IOException e1) {
