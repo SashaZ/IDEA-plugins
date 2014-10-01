@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.spacevseti</groupId>
-    <artifactId>css-merger</artifactId>
+    <artifactId>css-processor</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>

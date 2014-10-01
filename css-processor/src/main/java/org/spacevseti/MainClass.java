@@ -1,9 +1,9 @@
 package org.spacevseti;
 
+import org.spacevseti.merger.CssMerger;
+
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.List;
 
 /**
  * Created by space on 30.09.14.
@@ -12,7 +12,6 @@ import java.util.List;
 public class MainClass {
 
     public static void main(String[] args) throws IOException {
-        ResultMerger resultMerger = new CssMerger(new File("css-merger/css", "all.css")).merge();
-        System.out.println(resultMerger);
+        System.out.println(new CssMerger(new File("css-processor/html1/css", "all.css")).mergeTemp());
     }
 }

@@ -1,4 +1,4 @@
-package org.spacevseti.test;
+package org.spacevseti.example;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;

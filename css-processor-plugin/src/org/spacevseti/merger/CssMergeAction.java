@@ -5,11 +5,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.spacevseti.CssMerger;
-import org.spacevseti.ResultMerger;
+import org.spacevseti.filemerger.MergingResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.io.IOException;
  * Version 1
  */
 public class CssMergeAction extends AnAction {
-    private static final String CSS_EXTENSION = "css";
+//    private static final String CSS_EXTENSION = "css";
 
     @Override
     public void update(AnActionEvent e) {
@@ -30,7 +30,7 @@ public class CssMergeAction extends AnAction {
 
         boolean visible = project != null && files != null && files.length > 0 && file != null;
         if (visible) {
-            visible = CSS_EXTENSION.equals(FilenameUtils.getExtension(file.getCanonicalPath()));
+            visible = StringConstants.CSS_EXTENSION.getValue().equals(FilenameUtils.getExtension(file.getCanonicalPath()));
         }
         // Enable or disable
         e.getPresentation().setEnabled(visible);
@@ -41,8 +41,8 @@ public class CssMergeAction extends AnAction {
         Project project = e.getData(PlatformDataKeys.PROJECT);
         VirtualFile file = e.getData(PlatformDataKeys.VIRTUAL_FILE);
         String mergingFileName = file == null ? StringUtils.EMPTY : FilenameUtils.getName(file.getCanonicalPath());
-        if (!CSS_EXTENSION.equals(FilenameUtils.getExtension(mergingFileName))) {
-            Messages.showWarningDialog(project, "File name '" + mergingFileName + "' isn't valid. We can merge only " + CSS_EXTENSION + " file.", "Warning");
+        if (!StringConstants.CSS_EXTENSION.getValue().equals(FilenameUtils.getExtension(mergingFileName))) {
+            Messages.showWarningDialog(project, "File name '" + mergingFileName + "' isn't valid. We can merge only " + StringConstants.CSS_EXTENSION.getValue() + " file.", "Warning");
             return;
         }
 
@@ -50,10 +50,13 @@ public class CssMergeAction extends AnAction {
         if (Messages.CANCEL == okCancelDialogResult) {
             return;
         }
+        Pair<String, Boolean> stringBooleanPair = Messages.showInputDialogWithCheckBox("Message", "Title", "checkbox text", true, true, null, "initial value", null);
+        System.out.println("stringBooleanPair = " + stringBooleanPair);
+
         try {
             File mergingFile = new File(file.getCanonicalPath());
-            ResultMerger resultMerger = new CssMerger(mergingFile).merge();
-            Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + resultMerger,
+            MergingResult mergingResult = new CssMerger(mergingFile).mergeTemp();
+            Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + mergingResult,
                     "Information", Messages.getInformationIcon());
         } catch (IOException e1) {
             Messages.showErrorDialog(project, "Merging css file '" + mergingFileName + "' isn't finished!\n" + e1.getMessage(), "Error");

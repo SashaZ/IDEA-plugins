@@ -1,40 +1,40 @@
-package org.spacevseti;
+package org.spacevseti.filemerger;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by space on 01.10.14.
  * Version 1
  */
-public class ResultMerger {
-    private final List<String> mergedFiles;
-    private final List<String> excludedFiles;
-    private final List<String> notFoundFiles;
-    private final List<String> warnings;
+public class MergingResult {
+    private final Collection<String> mergedFiles;
+    private final Collection<String> excludedFiles;
+    private final Collection<String> failedFiles;
+    private final Collection<String> warnings;
 
-    public ResultMerger() {
+    public MergingResult() {
         this.mergedFiles = new ArrayList<String>();
         this.excludedFiles = new ArrayList<String>();
-        this.notFoundFiles = new ArrayList<String>();
+        this.failedFiles = new ArrayList<String>();
         this.warnings = new ArrayList<String>();
     }
 
-    public List<String> getMergedFiles() {
+    public Collection<String> getMergedFiles() {
         return mergedFiles;
     }
 
-    public List<String> getExcludedFiles() {
+    public Collection<String> getExcludedFiles() {
         return excludedFiles;
     }
 
-    public List<String> getNotFoundFiles() {
-        return notFoundFiles;
+    public Collection<String> getFailedFiles() {
+        return failedFiles;
     }
 
-    public List<String> getWarnings() {
+    public Collection<String> getWarnings() {
         return warnings;
     }
 
@@ -43,7 +43,7 @@ public class ResultMerger {
         StringBuilder result = new StringBuilder();
         result.append(formatResultMergerList("Merged files: ", getMergedFiles()));
         result.append(formatResultMergerList("Excluded files: ", getExcludedFiles()));
-        result.append(formatResultMergerList("Not founded files: ", getNotFoundFiles()));
+        result.append(formatResultMergerList("Failed files: ", getFailedFiles()));
         result.append(formatResultMergerList("Warnings: ", getWarnings()));
         if (result.length() == 0) {
             return StringUtils.EMPTY;
@@ -53,7 +53,7 @@ public class ResultMerger {
         return result.toString();
     }
 
-    private String formatResultMergerList(String ChapterName, List<String> fileNameList) {
+    private String formatResultMergerList(String ChapterName, Collection<String> fileNameList) {
         if (fileNameList.isEmpty()) {
             return StringUtils.EMPTY;
         }

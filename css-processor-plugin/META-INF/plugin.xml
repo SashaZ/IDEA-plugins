@@ -31,7 +31,7 @@
   <application-components>
     <!-- Add your application components here -->
       <component>
-          <implementation-class>org.spacevseti.test.MyPluginRegistration</implementation-class>
+          <implementation-class>org.spacevseti.example.MyPluginRegistration</implementation-class>
       </component>
   </application-components>
 
