@@ -1,6 +1,7 @@
 package org.spacevseti.filemerger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.spacevseti.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,28 +42,15 @@ public class MergingResult {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append(formatResultMergerList("Merged files: ", getMergedFiles()));
-        result.append(formatResultMergerList("Excluded files: ", getExcludedFiles()));
-        result.append(formatResultMergerList("Failed files: ", getFailedFiles()));
-        result.append(formatResultMergerList("Warnings: ", getWarnings()));
+        result.append(Utils.formatList("Merged files: ", getMergedFiles()));
+        result.append(Utils.formatList("Excluded files: ", getExcludedFiles()));
+        result.append(Utils.formatList("Failed files: ", getFailedFiles()));
+        result.append(Utils.formatList("Warnings: ", getWarnings()));
         if (result.length() == 0) {
             return StringUtils.EMPTY;
         }
         String prepend = "\nMerging result: ";
         result.insert(0, prepend);
-        return result.toString();
-    }
-
-    private String formatResultMergerList(String ChapterName, Collection<String> fileNameList) {
-        if (fileNameList.isEmpty()) {
-            return StringUtils.EMPTY;
-        }
-        StringBuilder result = new StringBuilder();
-        result.append("\n  ").append(ChapterName).append("\n");
-
-        for (String fileName : fileNameList) {
-            result.append("\t- ").append(fileName).append("\n");
-        }
         return result.toString();
     }
 }

@@ -1,5 +1,8 @@
 package org.spacevseti.cssmerger;
 
+import org.apache.commons.lang3.StringUtils;
+import org.spacevseti.Utils;
+
 import java.util.*;
 
 /**
@@ -21,5 +24,18 @@ public class AnalyzeResult {
 
     public Map<String, String> getExcludeImportFileNamesWithCause() {
         return excludeImportFileNamesWithCause;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append(Utils.formatList("Found files for importing: ", getImportFileNames()));
+        result.append(Utils.formatMap("Excluded files: ", getExcludeImportFileNamesWithCause()));
+        if (result.length() == 0) {
+            return StringUtils.EMPTY;
+        }
+        String prepend = "\nAnalyze result: ";
+        result.insert(0, prepend);
+        return result.toString();
     }
 }
