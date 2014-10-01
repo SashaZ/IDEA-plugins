@@ -12,7 +12,7 @@ import java.util.List;
 public class MainClass {
 
     public static void main(String[] args) throws IOException {
-        List<String> warnings = new CssMerger(new File("all.css")).merge();
-        System.out.println("warnings = " + warnings);
+        ResultMerger resultMerger = new CssMerger(new File("css-merger/css", "all.css")).merge();
+        System.out.println(resultMerger);
     }
 }

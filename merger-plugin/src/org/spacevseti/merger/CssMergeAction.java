@@ -13,7 +13,6 @@ import org.spacevseti.ResultMerger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by space on 01.10.14.
@@ -29,12 +28,10 @@ public class CssMergeAction extends AnAction {
         VirtualFile[] files = e.getData(PlatformDataKeys.VIRTUAL_FILE_ARRAY);
         VirtualFile file = e.getData(PlatformDataKeys.VIRTUAL_FILE);
 
-        boolean visible = project != null && files != null && files.length > 0 && file!=null;
+        boolean visible = project != null && files != null && files.length > 0 && file != null;
         if (visible) {
-            visible = CSS_EXTENSION.equals(FilenameUtils.getExtension(StringUtils.defaultString(file.getCanonicalPath())));
+            visible = CSS_EXTENSION.equals(FilenameUtils.getExtension(file.getCanonicalPath()));
         }
-        // Visibility
-//        e.getPresentation().setVisible(visible);
         // Enable or disable
         e.getPresentation().setEnabled(visible);
 
@@ -56,29 +53,10 @@ public class CssMergeAction extends AnAction {
         try {
             File mergingFile = new File(file.getCanonicalPath());
             ResultMerger resultMerger = new CssMerger(mergingFile).merge();
-            Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + formatResultMerger(resultMerger),
+            Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + resultMerger,
                     "Information", Messages.getInformationIcon());
         } catch (IOException e1) {
             Messages.showErrorDialog(project, "Merging css file '" + mergingFileName + "' isn't finished!\n" + e1.getMessage(), "Error");
-        }
-    }
-
-    private String formatResultMerger(ResultMerger resultMerger) {
-        StringBuilder result = new StringBuilder();
-        formatResultMergerList(result, "Merged files: ", resultMerger.getMergedFiles());
-        formatResultMergerList(result, "Excluded files: ", resultMerger.getExcludedFiles());
-        formatResultMergerList(result, "Not founded files: ", resultMerger.getNotFoundFiles());
-        formatResultMergerList(result, "Warnings: ", resultMerger.getWarnings());
-        return result.length()==0 ? StringUtils.EMPTY : "\n\n" + result.toString();
-    }
-
-    private void formatResultMergerList(StringBuilder result, String ChapterName, List<String> fileNameList) {
-        if (!fileNameList.isEmpty()) {
-            result.append(ChapterName).append("\n");
-            for (String fileName : fileNameList) {
-                result.append("\t- ").append(fileName).append("\n");
-            }
-            result.append("\n");
         }
     }
 }
