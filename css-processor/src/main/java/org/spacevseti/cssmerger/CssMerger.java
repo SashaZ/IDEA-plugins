@@ -33,10 +33,10 @@ public class CssMerger extends FileMerger {
     protected final void postProcessing(File resultFile, MergingResult mergingResult) throws IOException {
         LineIterator it = null;
         OutputStream outputStream = null;
+        File tempFile = new File(FileUtils.getTempDirectory(), System.currentTimeMillis() + "-postmerging.temp");
         try {
             it = FileUtils.lineIterator(resultFile, StringConstants.CHARSET.getValue());
 
-            File tempFile = new File(FileUtils.getTempDirectory(), System.currentTimeMillis() + "-postmerging.temp");
             outputStream = FileUtils.openOutputStream(tempFile, true);
 
             Pattern pattern = Pattern.compile(StringConstants.CSS_IMPORT_REPLACE_PATTERN2.getValue());
@@ -50,9 +50,6 @@ public class CssMerger extends FileMerger {
                 }
                 IOUtils.writeLines(Collections.singletonList(line), IOUtils.LINE_SEPARATOR, outputStream,StringConstants.CHARSET.getValue());
             }
-
-            FileUtils.deleteQuietly(resultFile);
-            FileUtils.moveFile(tempFile, resultFile);
         } catch (IOException e) {
             String errorMsg = "Can't read file '" + resultFile + "'!";
             throw new IOException(errorMsg, e);
@@ -60,5 +57,8 @@ public class CssMerger extends FileMerger {
             LineIterator.closeQuietly(it);
             IOUtils.closeQuietly(outputStream);
         }
+
+        FileUtils.deleteQuietly(resultFile);
+        FileUtils.moveFile(tempFile, resultFile);
     }
 }
