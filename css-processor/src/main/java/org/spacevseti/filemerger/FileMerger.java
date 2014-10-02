@@ -146,6 +146,7 @@ public class FileMerger {
         try {
             importInputStream = FileUtils.openInputStream(importFile);
             IOUtils.copy(importInputStream, outputStream);
+            IOUtils.writeLines(Collections.singletonList(StringUtils.EMPTY), IOUtils.LINE_SEPARATOR, outputStream);
         } catch (IOException e) {
             String errorMsg = "Can't import content from file '" + importFile + "'!";
             throw new IOException(errorMsg, e);

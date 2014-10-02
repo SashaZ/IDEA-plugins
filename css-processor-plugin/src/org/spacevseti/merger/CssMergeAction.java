@@ -14,8 +14,12 @@ import org.spacevseti.cssmerger.CssMerger;
 import org.spacevseti.cssmerger.StringConstants;
 import org.spacevseti.filemerger.MergingResult;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by space on 01.10.14.
@@ -54,22 +58,41 @@ public class CssMergeAction extends AnAction {
         File mergingFile = new File(file.getCanonicalPath());
         try {
             AnalyzeResult analyzeResult = analyzer.preMergeAnalyze(mergingFile);
+            String message = "Will merge file '" + mergingFileName + "'?\n\n";
+//            String message = "Will merge file '" + mergingFileName + "'?\n" + analyzeResult;
 //            int dialogResult = Messages.showOkCancelDialog(project, "Will merge file '" + mergingFileName + "'?\n" + analyzeResult, "Information", Messages.getQuestionIcon());
-            String message = "Will merge file '" + mergingFileName + "'?\n" + analyzeResult;
-            int dialogResult = Messages.showYesNoCancelDialog(project, message, "Information",
-                    "Yes", "Yes and remove imported files", "Cancel", Messages.getQuestionIcon());
+            int dialogResult = Messages.CANCEL;
+//            DialogWrapper.
+//            CheckBoxList
+//            Messages.showEditableChooseDialog(message, "", null, "1,2,3".split(","), null, null);
+            MessagesExt.CheckBoxListDialog dialog = new MessagesExt.CheckBoxListDialog(project, message,
+                    "Merge CSS", Messages.getQuestionIcon(), analyzeResult);
+            dialog.show();
+            List<JCheckBox> result = dialog.getResult();
+            dialogResult = result == null ? Messages.CANCEL : Messages.OK;
+//            dialogResult = Messages.showYesNoCancelDialog(project, message, "Information", "Yes", "Yes and remove imported files", "Cancel", Messages.getQuestionIcon());
             if (Messages.CANCEL == dialogResult) {
                 return;
             }
 
             MergingResult mergingResult = new CssMerger(mergingFile).
-                    setExcludeImportFilePaths(analyzeResult.getExcludeImportFileNamesWithCause().keySet())
-                    .setRemoveImportedFiles(Messages.NO == dialogResult)
+                    setExcludeImportFilePaths(getExcludeImportFilePaths(analyzeResult, result))
+//                    .setRemoveImportedFiles(Messages.NO == dialogResult)
                     .merge();
-            Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + mergingResult,
+            Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!\n" + mergingResult,
                     "Information", Messages.getInformationIcon());
         } catch (IOException e1) {
             Messages.showErrorDialog(project, "Merging css file '" + mergingFileName + "' isn't finished!\n" + e1.getMessage(), "Error");
         }
+    }
+
+    private Collection<String> getExcludeImportFilePaths(AnalyzeResult analyzeResult, List<JCheckBox> resultCheckBoxes) {
+        Collection<String> result = new HashSet<String>(/*analyzeResult.getExcludeImportFileNamesWithCause().keySet()*/);
+        for (JCheckBox checkBox : resultCheckBoxes) {
+            if (!checkBox.isSelected()) {
+                result.add(checkBox.getText());
+            }
+        }
+        return result;
     }
 }

@@ -55,7 +55,7 @@ public class Analyzer {
             }
         }
         if (!new File(rootDir, importFileName).exists()) {
-            return StringConstants.EXCLUDE_CAUSE_NOT_FOUND.name();
+            return StringConstants.EXCLUDE_CAUSE_NOT_FOUND.getValue();
         }
         return StringUtils.EMPTY;
     }
