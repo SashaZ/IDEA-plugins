@@ -29,8 +29,8 @@ public class AnalyzeResult {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append(Utils.formatList("Found files for importing: ", getImportFileNames()));
-        result.append(Utils.formatMap("Excluded files: ", getExcludeImportFileNamesWithCause()));
+        result.append(Utils.formatList("Found files for importing", getImportFileNames()));
+        result.append(Utils.formatMap("Excluded files", getExcludeImportFileNamesWithCause()));
         if (result.length() == 0) {
             return StringUtils.EMPTY;
         }

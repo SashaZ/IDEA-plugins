@@ -5,10 +5,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.spacevseti.cssmerger.AnalyzeResult;
+import org.spacevseti.cssmerger.Analyzer;
 import org.spacevseti.cssmerger.CssMerger;
 import org.spacevseti.cssmerger.StringConstants;
 import org.spacevseti.filemerger.MergingResult;
@@ -48,16 +49,23 @@ public class CssMergeAction extends AnAction {
             return;
         }
 
-        int okCancelDialogResult = Messages.showOkCancelDialog(project, "Will merge file '" + mergingFileName + "'?", "Information", Messages.getQuestionIcon());
-        if (Messages.CANCEL == okCancelDialogResult) {
-            return;
-        }
-        Pair<String, Boolean> stringBooleanPair = Messages.showInputDialogWithCheckBox("Message", "Title", "checkbox text", true, true, null, "initial value", null);
-        System.out.println("stringBooleanPair = " + stringBooleanPair);
-
+        Analyzer analyzer = new Analyzer();
+        assert file != null;
+        File mergingFile = new File(file.getCanonicalPath());
         try {
-            File mergingFile = new File(file.getCanonicalPath());
-            MergingResult mergingResult = new CssMerger(mergingFile).merge();
+            AnalyzeResult analyzeResult = analyzer.preMergeAnalyze(mergingFile);
+//            int dialogResult = Messages.showOkCancelDialog(project, "Will merge file '" + mergingFileName + "'?\n" + analyzeResult, "Information", Messages.getQuestionIcon());
+            String message = "Will merge file '" + mergingFileName + "'?\n" + analyzeResult;
+            int dialogResult = Messages.showYesNoCancelDialog(project, message, "Information",
+                    "Yes", "Yes and remove imported files", "Cancel", Messages.getQuestionIcon());
+            if (Messages.CANCEL == dialogResult) {
+                return;
+            }
+
+            MergingResult mergingResult = new CssMerger(mergingFile).
+                    setExcludeImportFilePaths(analyzeResult.getExcludeImportFileNamesWithCause().keySet())
+                    .setRemoveImportedFiles(Messages.NO == dialogResult)
+                    .merge();
             Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!" + mergingResult,
                     "Information", Messages.getInformationIcon());
         } catch (IOException e1) {

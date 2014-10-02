@@ -33,7 +33,7 @@ public final class Utils {
             return StringUtils.EMPTY;
         }
         StringBuilder result = new StringBuilder();
-        result.append("\n  ").append(ChapterName).append(" (").append(list.size()).append(")").append("\n");
+        result.append("\n  ").append(ChapterName).append(" (").append(list.size()).append("): \n");
 
         for (String fileName : list) {
             result.append("\t- ").append(fileName).append("\n");
@@ -46,7 +46,7 @@ public final class Utils {
             return StringUtils.EMPTY;
         }
         StringBuilder result = new StringBuilder();
-        result.append("\n  ").append(ChapterName).append(" (").append(map.size()).append(")").append("\n");
+        result.append("\n  ").append(ChapterName).append(" (").append(map.size()).append("): \n");
 
         for (Map.Entry<String, String> entry : map.entrySet()) {
             result.append("\t- ").append(entry.getKey()).append(" (").append(entry.getValue()).append(")").append("\n");

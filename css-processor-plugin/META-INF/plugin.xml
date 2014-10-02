@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>org.spacevseti.CssMergerPlugin</id>
   <name>Css Merger Plugin</name>
-  <version>1.3</version>
+  <version>1.4</version>
   <vendor email="dev@spacevseti.org.ua" url="http://www.spacevseti.org">Space Vseti</vendor>
 
   <description><![CDATA[

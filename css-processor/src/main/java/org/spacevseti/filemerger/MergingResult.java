@@ -42,10 +42,10 @@ public class MergingResult {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append(Utils.formatList("Merged files: ", getMergedFiles()));
-        result.append(Utils.formatList("Excluded files: ", getExcludedFiles()));
-        result.append(Utils.formatList("Failed files: ", getFailedFiles()));
-        result.append(Utils.formatList("Warnings: ", getWarnings()));
+        result.append(Utils.formatList("Merged files", getMergedFiles()));
+        result.append(Utils.formatList("Excluded files", getExcludedFiles()));
+        result.append(Utils.formatList("Failed files", getFailedFiles()));
+        result.append(Utils.formatList("Warnings", getWarnings()));
         if (result.length() == 0) {
             return StringUtils.EMPTY;
         }
