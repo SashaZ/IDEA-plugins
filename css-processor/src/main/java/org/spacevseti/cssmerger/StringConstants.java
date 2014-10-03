@@ -19,6 +19,7 @@ public enum StringConstants {
     EXCLUDE_CAUSE_DON_NOT_COPY("do not copy"),
     EXCLUDE_CAUSE_REMOTE_LINK("remote link"),
     EXCLUDE_CAUSE_NOT_FOUND("not found"),
+    AGREE_REMOVE_IMPORTED_FILES("Удалить импортированные файлы?"),
     ;
 
     private final String value;

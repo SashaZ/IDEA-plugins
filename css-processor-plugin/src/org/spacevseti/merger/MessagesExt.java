@@ -1,22 +1,15 @@
 package org.spacevseti.merger;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.InputValidator;
-import com.intellij.openapi.ui.InputValidatorEx;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.MultiLineLabelUI;
 import com.intellij.ui.CheckBoxList;
-import com.intellij.ui.DocumentAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spacevseti.cssmerger.AnalyzeResult;
+import org.spacevseti.cssmerger.StringConstants;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.plaf.basic.BasicHTML;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +21,7 @@ public class MessagesExt extends Messages {
     public static class CheckBoxListDialog extends InputDialog {
         private final AnalyzeResult analyzeResult;
         private CheckBoxList<String> checkboxes;
+        private JCheckBox agreeRemoveImportedFiles;
 
         public CheckBoxListDialog(@Nullable Project project,
                                   String message,
@@ -99,7 +93,10 @@ public class MessagesExt extends Messages {
 
             checkboxes = new CheckBoxList<String>();
             checkboxes.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-            messagePanel.add(checkboxes, BorderLayout.SOUTH);
+            messagePanel.add(checkboxes, BorderLayout.CENTER);
+
+            this.agreeRemoveImportedFiles = new JCheckBox(StringConstants.AGREE_REMOVE_IMPORTED_FILES.getValue(), false);
+            messagePanel.add(agreeRemoveImportedFiles, BorderLayout.SOUTH);
 
             return messagePanel;
         }
@@ -125,6 +122,10 @@ public class MessagesExt extends Messages {
                 return checkboxes.getSelectedValuesList();
             }
             return null;
+        }
+
+        public boolean isAgreeRemoveImportedFiles() {
+            return agreeRemoveImportedFiles != null && agreeRemoveImportedFiles.isSelected();
         }
 
         /*protected JComponent createTextComponent() {

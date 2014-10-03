@@ -77,7 +77,7 @@ public class CssMergeAction extends AnAction {
 
             MergingResult mergingResult = new CssMerger(mergingFile).
                     setExcludeImportFilePaths(getExcludeImportFilePaths(analyzeResult, result))
-//                    .setRemoveImportedFiles(Messages.NO == dialogResult)
+                    .setRemoveImportedFiles(dialog.isAgreeRemoveImportedFiles())
                     .merge();
             Messages.showMessageDialog(project, "Merging css file '" + mergingFileName + "' finished!\n" + mergingResult,
                     "Information", Messages.getInformationIcon());
