@@ -10,31 +10,29 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.NullableComputable;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.spacevseti.Utils;
-import org.spacevseti.cssmerger.AnalyzeResult;
 import org.spacevseti.cssmerger.Analyzer;
 import org.spacevseti.cssmerger.CssMerger;
 import org.spacevseti.cssmerger.StringConstants;
 import org.spacevseti.filemerger.MergingResult;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created by space on 01.10.14.
  * Version 1
  */
 public class CssMergeAction extends AnAction {
-//    private static final String CSS_EXTENSION = "css";
 
     @Override
     public void update(AnActionEvent e) {
         super.update(e);
-        Project project = e.getData(PlatformDataKeys.PROJECT);
+        Project project = getEventProject(e);
         VirtualFile[] files = e.getData(PlatformDataKeys.VIRTUAL_FILE_ARRAY);
         VirtualFile file = e.getData(PlatformDataKeys.VIRTUAL_FILE);
 
@@ -48,58 +46,43 @@ public class CssMergeAction extends AnAction {
     }
 
     public void actionPerformed(AnActionEvent e) {
-        Project project = e.getData(PlatformDataKeys.PROJECT);
+        Project project = getEventProject(e);
+        if (project == null) return;
         VirtualFile selectedVirtualFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
-        String mergingFileName = selectedVirtualFile == null ? StringUtils.EMPTY : FilenameUtils.getName(selectedVirtualFile.getCanonicalPath());
+        if (selectedVirtualFile == null || selectedVirtualFile.getCanonicalPath() == null) return;
+
+        String mergingFileName = FilenameUtils.getName(selectedVirtualFile.getCanonicalPath());
         if (!StringConstants.CSS_EXTENSION.getValue().equals(FilenameUtils.getExtension(mergingFileName))) {
-            Messages.showWarningDialog(project, "File name '" + mergingFileName + "' isn't valid. We can merge only " + StringConstants.CSS_EXTENSION.getValue() + " file.", "Warning");
+            String message = "File name '" + mergingFileName + "' isn't valid. We can merge only " + StringConstants.CSS_EXTENSION.getValue() + " file.";
+            Messages.showWarningDialog(project, message, "Warning");
             return;
         }
 
-        Analyzer analyzer = new Analyzer();
-        assert selectedVirtualFile != null;
         File mergingFile = new File(selectedVirtualFile.getCanonicalPath());
         try {
-            AnalyzeResult analyzeResult = analyzer.preMergeAnalyze(mergingFile);
             String message = "Will merge file '" + mergingFileName + "'?\n\n";
-            MessagesExt.CheckBoxListDialog dialog = new MessagesExt.CheckBoxListDialog(project, message,
-                    "Merge CSS", Messages.getQuestionIcon(), analyzeResult);
-            dialog.show();
-            List<JCheckBox> result = dialog.getResult();
-            int dialogResult = result == null ? Messages.CANCEL : Messages.OK;
-//            dialogResult = Messages.showYesNoCancelDialog(project, message, "Information", "Yes", "Yes and remove imported files", "Cancel", Messages.getQuestionIcon());
-            if (Messages.CANCEL == dialogResult) {
+            MessagesExt.CheckBoxListDialog dialog = new MessagesExt.CheckBoxListDialog(project, message, "Merge CSS?",
+                    Messages.getQuestionIcon(), new Analyzer().preMergeAnalyze(mergingFile));
+
+            Collection<String> excludeImportFilePaths = dialog.getExcludeImportFilePaths();
+            if (excludeImportFilePaths == null) {
                 return;
             }
 
-            MergingResult mergingResult = new CssMerger(mergingFile).
-                    setExcludeImportFilePaths(getExcludeImportFilePaths(analyzeResult, result))
-//                    .setRemoveImportedFiles(dialog.isAgreeRemoveImportedFiles())
-                    .merge();
+            MergingResult mergingResult = new CssMerger(mergingFile).setExcludeImportFilePaths(excludeImportFilePaths).merge();
 
             Collection<String> deletedImportedFiles = Collections.emptyList();
             if (dialog.isAgreeRemoveImportedFiles()) {
                 deletedImportedFiles = deleteImportedFiles(selectedVirtualFile, mergingResult);
             }
 
-            Messages.showMessageDialog(project, getResultMessage(mergingFileName, mergingResult, deletedImportedFiles),
-                    "Information", Messages.getInformationIcon());
+            String resultMessage = getResultMessage(mergingFileName, mergingResult, deletedImportedFiles);
+            Messages.showMessageDialog(project, resultMessage, "Information", Messages.getInformationIcon());
         } catch (IOException e1) {
             Messages.showErrorDialog(project, "Merging css file '" + mergingFileName + "' isn't finished!\n" + e1.getMessage(), "Error");
+        } finally {
+            selectedVirtualFile.getParent().refresh(false, true);
         }
-        selectedVirtualFile.getParent().refresh(false, true);
-    }
-
-    private String getResultMessage(@NotNull String mergingFileName, @NotNull MergingResult mergingResult, @NotNull Collection<String> deletedImportedFiles) {
-        StringBuilder result = new StringBuilder()
-                .append("Merging css file '")
-                .append(mergingFileName)
-                .append("' finished!\n")
-                .append(mergingResult);
-        if (!deletedImportedFiles.isEmpty()) {
-            result.append(Utils.formatList("Deleted imported files", deletedImportedFiles));
-        }
-        return result.toString();
     }
 
     private Collection<String> deleteImportedFiles(@NotNull final VirtualFile selectedVirtualFile, @NotNull final MergingResult mergingResult) {
@@ -126,13 +109,15 @@ public class CssMergeAction extends AnAction {
         );
     }
 
-    private Collection<String> getExcludeImportFilePaths(AnalyzeResult analyzeResult, List<JCheckBox> resultCheckBoxes) {
-        Collection<String> result = new HashSet<String>(/*analyzeResult.getExcludeImportFileNamesWithCause().keySet()*/);
-        for (JCheckBox checkBox : resultCheckBoxes) {
-            if (!checkBox.isSelected()) {
-                result.add(checkBox.getText());
-            }
+    private String getResultMessage(@NotNull String mergingFileName, @NotNull MergingResult mergingResult, @NotNull Collection<String> deletedImportedFiles) {
+        StringBuilder result = new StringBuilder()
+                .append("Merging css file '")
+                .append(mergingFileName)
+                .append("' finished!\n")
+                .append(mergingResult);
+        if (!deletedImportedFiles.isEmpty()) {
+            result.append(Utils.formatList("Deleted imported files", deletedImportedFiles));
         }
-        return result;
+        return result.toString();
     }
 }

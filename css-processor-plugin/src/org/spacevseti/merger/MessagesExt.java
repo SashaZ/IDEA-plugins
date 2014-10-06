@@ -10,6 +10,8 @@ import org.spacevseti.cssmerger.StringConstants;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,62 +30,12 @@ public class MessagesExt extends Messages {
                                   String title,
                                   @Nullable Icon icon,
                                   @NotNull AnalyzeResult analyzeResult) {
-            super(project, message, title, icon, "", null, new String[]{OK_BUTTON, CANCEL_BUTTON}, 0);
+            super(project, message, title, icon, null, null, new String[]{OK_BUTTON, CANCEL_BUTTON}, 0);
             this.analyzeResult = analyzeResult;
             fillCheckBoxes();
+            show();
         }
 
-        /*
-                @NotNull
-                @Override
-                protected Action[] createActions() {
-                    final Action[] actions = new Action[myOptions.length];
-                    for (int i = 0; i < myOptions.length; i++) {
-                        String option = myOptions[i];
-                        final int exitCode = i;
-                        if (i == 0) { // "OK" is default button. It has index 0.
-                            actions[i] = getOKAction();
-                            actions[i].putValue(DEFAULT_ACTION, Boolean.TRUE);
-                        }
-                        else {
-                            actions[i] = new AbstractAction(option) {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    close(exitCode);
-                                }
-                            };
-                        }
-                    }
-                    return actions;
-                }
-
-                @Override
-                protected void doOKAction() {
-                    String inputString = myField.getText().trim();
-                    close(0);
-                }
-
-                @Override
-                protected JComponent createCenterPanel() {
-                    return null;
-                }
-
-                @Override
-                protected JComponent createNorthPanel() {
-                    JPanel panel = new JPanel(new BorderLayout(15, 0));
-                    if (myIcon != null) {
-                        JLabel iconLabel = new JLabel(myIcon);
-                        Container container = new Container();
-                        container.setLayout(new BorderLayout());
-                        container.add(iconLabel, BorderLayout.NORTH);
-                        panel.add(container, BorderLayout.WEST);
-                    }
-
-                    JPanel messagePanel = createMessagePanel();
-                    panel.add(messagePanel, BorderLayout.CENTER);
-
-                    return panel;
-                }*/
         protected JPanel createMessagePanel() {
             JPanel messagePanel = super.createMessagePanel();
             if (myMessage != null) {
@@ -115,80 +67,24 @@ public class MessagesExt extends Messages {
             }
         }
 
-        @Nullable
-        public java.util.List<JCheckBox> getResult() {
-            if (getExitCode() == 0) {
-                checkboxes.setSelectionInterval(0, analyzeResult.getImportFileNames().size() - 1);
-                return checkboxes.getSelectedValuesList();
+        public Collection<String> getExcludeImportFilePaths() {
+            if (getExitCode() != 0) {
+                return null;
             }
-            return null;
+            checkboxes.setSelectionInterval(0, analyzeResult.getImportFileNames().size() - 1);
+            java.util.List<JCheckBox> selectedValues = checkboxes.getSelectedValuesList();
+
+            Collection<String> result = new HashSet<String>();
+            for (JCheckBox checkBox : selectedValues) {
+                if (!checkBox.isSelected()) {
+                    result.add(checkBox.getText());
+                }
+            }
+            return result;
         }
 
         public boolean isAgreeRemoveImportedFiles() {
             return agreeRemoveImportedFiles != null && agreeRemoveImportedFiles.isSelected();
         }
-
-        /*protected JComponent createTextComponent() {
-            JComponent textComponent;
-            if (BasicHTML.isHTMLString(myMessage)) {
-                textComponent = createMessageComponent(myMessage);
-            } else {
-                JLabel textLabel = new JLabel(myMessage);
-                textLabel.setUI(new MultiLineLabelUI());
-                textComponent = textLabel;
-            }
-            textComponent.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
-            return textComponent;
-        }*/
-
-        /*
-
-        protected JPanel createMessagePanel() {
-            JPanel messagePanel = new JPanel(new BorderLayout());
-            if (myMessage != null) {
-                JComponent textComponent = createTextComponent();
-                messagePanel.add(textComponent, BorderLayout.NORTH);
-            }
-
-            myField = createTextFieldComponent();
-            messagePanel.add(myField, BorderLayout.SOUTH);
-
-            return messagePanel;
-        }
-
-        protected JComponent createTextComponent() {
-            JComponent textComponent;
-            if (BasicHTML.isHTMLString(myMessage)) {
-                textComponent = createMessageComponent(myMessage);
-            }
-            else {
-                JLabel textLabel = new JLabel(myMessage);
-                textLabel.setUI(new MultiLineLabelUI());
-                textComponent = textLabel;
-            }
-            textComponent.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
-            return textComponent;
-        }
-
-        public JTextComponent getTextField() {
-            return myField;
-        }
-
-        protected JTextComponent createTextFieldComponent() {
-            return new JTextField(30);
-        }
-
-        @Override
-        public JComponent getPreferredFocusedComponent() {
-            return myField;
-        }
-
-        @Nullable
-        public String getInputString() {
-            if (getExitCode() == 0) {
-                return myField.getText().trim();
-            }
-            return null;
-        }*/
     }
 }

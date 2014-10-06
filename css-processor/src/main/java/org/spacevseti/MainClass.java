@@ -16,7 +16,7 @@ public class MainClass {
     public static void main(String[] args) throws IOException {
         File allCssFile = new File("css-processor/html1/css", "all.css");
 
-        System.out.println(new CssMerger(allCssFile).merge());
+        System.out.println(new CssMerger(allCssFile, true).merge());
 //        testLineIterator(allCssFile);
     }
 
